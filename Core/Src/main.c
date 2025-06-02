@@ -1,18 +1,18 @@
-/* Includes ------------------------------------------------------------------*/
+
 #include "main.h"
 #include "cmsis_os.h"
 #include "dht11.h"
 #include "string.h"
 #include <stdio.h>
 
-/* Private variables ---------------------------------------------------------*/
+
 UART_HandleTypeDef huart1;
 osThreadId_t DHT11TaskHandle;
 osThreadId_t UARTTaskHandle;
 osThreadId_t LEDTaskHandle;
 osSemaphoreId_t dataReadySemaphoreHandle;
 
-/* Definitions for tasks */
+
 const osThreadAttr_t DHT11Task_attributes = {
   .name = "DHT11Task",
   .stack_size = 128 * 4,
@@ -31,12 +31,12 @@ const osThreadAttr_t LEDTask_attributes = {
   .priority = (osPriority_t) osPriorityLow,
 };
 
-/* Private variables ---------------------------------------------------------*/
+
 uint8_t dht11_data[5];
 uint8_t data_sent_count = 0;
 #define MAX_DATA_SENT 10
 
-/* Private function prototypes -----------------------------------------------*/
+
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART1_UART_Init(void);
@@ -52,13 +52,13 @@ int _write(int file, char *ptr, int len) {
 }
 /* USER CODE END PFP */
 
-/* Main function -------------------------------------------------------------*/
+
 int main(void)
 {
   /* Reset peripherals and initialize Flash & Systick */
   HAL_Init();
 
-  /* Configure system clock */
+  
   SystemClock_Config();
 
   /* Initialize peripherals */
@@ -106,7 +106,7 @@ void StartDHT11Task(void *argument)
       dht11_data[1] = humidity;
       osSemaphoreRelease(dataReadySemaphoreHandle);
       /* USER CODE BEGIN DHT11_Read_Success */
-      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET); // Visual indicator
+      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET); 
       osDelay(10);
       HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);
       /* USER CODE END DHT11_Read_Success */
@@ -117,7 +117,7 @@ void StartDHT11Task(void *argument)
       printf("DHT11 Read Failed\r\n");
       /* USER CODE END DHT11_Read_Fail */
     }
-    osDelay(2000); // Increased delay to 2 seconds
+    osDelay(2000); 
   }
 }
 
@@ -130,11 +130,10 @@ void StartUARTTask(void *argument)
 
   for (;;)
   {
-    if (osSemaphoreAcquire(dataReadySemaphoreHandle, 1000) == osOK) // 1s timeout
+    if (osSemaphoreAcquire(dataReadySemaphoreHandle, 1000) == osOK) 
     {
       int len = snprintf(uart_buffer, sizeof(uart_buffer),
-                      "Temp: %dC, Hum: %d%%\r\n", // Added \r for Windows terminals
-                      dht11_data[0], dht11_data[1]);
+                      "Temp: %dC, Hum: %d%%\r\n", 
 
       if (HAL_UART_Transmit(&huart1, (uint8_t*)uart_buffer, len, 1000) != HAL_OK)
       {
@@ -167,7 +166,7 @@ void StartLEDTask(void *argument)
 
   for (;;)
   {
-    HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0); // Active LED blinking
+    HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
     osDelay(500);
   }
 }
